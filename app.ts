@@ -1,9 +1,13 @@
 import express from 'express';
-var createError = require('http-errors');
-var path = require('path');
+let createError = require('http-errors');
+let path = require('path');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+import { connectToDatabase } from "./database/mongo";
+
+let indexRouter = require('./routes/index');
+let usersRouter = require('./routes/users');
+let realmsRouter = require('./routes/realms');
+
 
 const app = express();
 const port = 3000;
@@ -14,6 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/realms', realmsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -31,6 +36,8 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(port, () => {
-  return console.log(`Server is listening at http://localhost:${port}`);
+connectToDatabase().then(() => {
+  app.listen(port, () => {
+    return console.log(`Server is listening at http://localhost:${port}`);
+  });
 });

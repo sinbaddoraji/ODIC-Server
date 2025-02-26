@@ -3,5 +3,5 @@ import { ObjectId } from "mongodb";
 export interface Realm
 {
     id: ObjectId;
-    name: string;
+    realm_id: string;
 }

@@ -1,7 +1,11 @@
 import * as mongoDB from "mongodb";
 import * as dotenv from "dotenv";
 
-export const collections: { realms?: mongoDB.Collection } = {}
+export const collections: 
+{ 
+    realms?: mongoDB.Collection 
+
+} = {}
 
 export async function connectToDatabase () {
     dotenv.config();

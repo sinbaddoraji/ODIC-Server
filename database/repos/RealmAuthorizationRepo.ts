@@ -87,9 +87,6 @@ class RealmAuthorizationRepo {
 
             if (realmAuthInfo) 
             {
-                let users = realmAuthInfo.user_ids;
-
-
                 return  await Promise.all(
                     realmAuthInfo.user_ids.map(async (userId) => {
                       return await UserManagementRepo.GetUserById(userId);
@@ -144,7 +141,7 @@ class RealmAuthorizationRepo {
     }
 
 
-    async AssignRoleToUser(realm_id: string, user_id: string, role: string): Promise<boolean> {
+    async AssignRoleToUser(): Promise<boolean> {
         try {
             // Implementation for assigning a role to a user within a realm
         } catch (error) {
@@ -153,7 +150,7 @@ class RealmAuthorizationRepo {
         }
     }
 
-    async GetUserRoles(realm_id: string, user_id: string): Promise<string[]> {
+    async GetUserRoles(): Promise<string[]> {
         try {
             // Implementation for retrieving roles of a user within a realm
         } catch (error) {

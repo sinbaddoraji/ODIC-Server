@@ -2,6 +2,7 @@ import { ObjectId, MongoClient, Db, Collection } from "mongodb";
 import { Realm } from "../../models/realms/realm";
 import dotenv from "dotenv";
 import Database from "../database";
+import UserManagementRepo from "./UserManagementRepo";
 
 class RealmManagementRepo {
     private realmsCollection: Collection<Realm>;
@@ -52,6 +53,8 @@ class RealmManagementRepo {
     async deleteRealm(realmId: string): Promise<boolean> {
         try {
             const result = await this.realmsCollection.deleteOne({ _id: new ObjectId(realmId) });
+            UserManagementRepo.DeleteUser(realmId);
+
             return result.acknowledged;
         } catch (error) {
             console.error("Error deleting realm:", error);

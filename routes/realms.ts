@@ -8,7 +8,6 @@ import { Client } from "../models/clients/Client";
 import RealmAuthorizationRepo from "../database/repos/RealmAuthorizationRepo";
 const router = express.Router();
 
-
 const handleError = (res: Response, error: any) => {
   console.error(error);
   res.status(500).json({ error: "Internal Server Error" });
@@ -78,7 +77,7 @@ router.post("/:id/register", async (req, res) => {
 router.get('/:_realm/clients', async (req: Request, res: Response) => {
   try {
       const realm = req.params._realm;
-      const clients = await ClientManagementRepo.getAllClients();
+      const clients = await ClientManagementRepo.getClientsForRealm(realm);
       res.status(200).json(clients);
   } catch (error) {
       handleError(res, error);
@@ -89,10 +88,17 @@ router.post('/:_realm/clients', async (req: Request, res: Response) => {
   try {
       const realm = req.params._realm;
       const client = req.body as Omit<Client, "_id" | "createdAt" | "updatedAt">;
+
+      client.realm_id = realm;
       
       // Validate required fields
       if (!client.name || !client.description) {
           return res.status(400).json({ error: "Name and description are required" });
+      }
+
+      const clientFromDb = await ClientManagementRepo.getClient(client.name);
+      if (clientFromDb) {
+          return res.status(400).json({ error: "Client with this name already exists" });
       }
 
       const createdClient = await ClientManagementRepo.createClient(client);
@@ -112,6 +118,11 @@ router.get('/:_realm/clients/:clientId', async (req: Request, res: Response) => 
       const clientId = req.params.clientId;
 
       const client = await ClientManagementRepo.getClient(clientId);
+
+      if(client.realm_id !== realm) {
+          return res.status(404).json({ error: "Client not found" });
+      }
+
       if (!client) {
           return res.status(404).json({ error: "Client not found" });
       }
@@ -126,6 +137,11 @@ router.put('/:_realm/clients/:clientId', async (req: Request, res: Response) => 
       const realm = req.params._realm;
       const clientId = req.params.clientId;
       const updates = req.body as Partial<Client>;
+
+      const client = await ClientManagementRepo.getClient(clientId);
+      if(client.realm_id !== realm) {
+          return res.status(404).json({ error: "Client not found" });
+      }
 
       const updatedClient = await ClientManagementRepo.updateClient(clientId, updates);
       if (!updatedClient) {
@@ -142,6 +158,11 @@ router.delete('/:_realm/:clientId', async (req: Request, res: Response) => {
       const realm = req.params._realm;
       const clientId = req.params.clientId;
 
+      const client = await ClientManagementRepo.getClient(clientId);
+      if(client.realm_id !== realm) {
+          return res.status(404).json({ error: "Client not found" });
+      }
+
       await ClientManagementRepo.deleteClient(clientId);
       res.status(204).json({});
   } catch (error) {
@@ -154,4 +175,14 @@ router.delete('/:_realm/:clientId', async (req: Request, res: Response) => {
 });
 
 
-module.exports = router;
+
+// Authorization Endpoint
+router.get("/:realm/oauth/authorize", (req: Request, res: Response) => {
+  // Get authorization JWT from basic auth
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "Authorization header is required." });
+
+  // not implemented
+  res.status(501).json({ message: "Not implemented." });
+});
+

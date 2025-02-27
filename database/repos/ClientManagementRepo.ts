@@ -40,6 +40,16 @@ export class ClientManagementRepo {
         }
     }
 
+    public async getClientsForRealm(realmId: string): Promise<Client[] | null> {
+        try {
+            const clients = this.realmAuthInfoCollection.find({ realm_id: realmId });
+            return clients.toArray();
+        } catch (error) {
+            console.error("Error fetching client for realm:", error);
+            throw new Error("Failed to retrieve client");
+        }
+    }
+
     /**
      * Retrieves a single client by its ID
      * @param clientId The ID of the client to retrieve
